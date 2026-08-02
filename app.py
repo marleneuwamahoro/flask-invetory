@@ -1,3 +1,7 @@
+from services.openfoodfacts import (
+    search_product_by_barcode,
+    search_product_by_name
+)
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
 
@@ -85,6 +89,33 @@ def delete_product(id):
     return jsonify({
         "message": "Product deleted successfully"
     }), 200
+
+@app.route("/search", methods=["GET"])
+def search_product():
+
+    barcode = request.args.get("barcode")
+    name = request.args.get("name")
+
+
+    if barcode:
+        product = search_product_by_barcode(barcode)
+
+    elif name:
+        product = search_product_by_name(name)
+
+    else:
+        return jsonify({
+            "message": "Provide barcode or product name"
+        }), 400
+
+
+    if not product:
+        return jsonify({
+            "message": "Product not found"
+        }), 404
+
+
+    return jsonify(product), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
